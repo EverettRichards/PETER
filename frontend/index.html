@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PETER Dashboard</title>
+  <title>PETER</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <div id="root">
     <header class="topbar">
-      <div class="title">PETER Dashboard</div>
+      <div class="title">PETER</div>
       <div id="clock" class="clock">--:--</div>
     </header>
 
     <main class="grid">
+      <!-- Weather (spans full width) -->
       <section class="tile weather-tile" id="weather-tile">
         <div class="weather-header">
           <div class="weather-title">Weather</div>
@@ -23,8 +24,10 @@
         <div class="weather-primary" id="weather-primary">
           <div class="weather-primary-left">
             <div class="weather-city" id="primary-city">--</div>
+
             <div class="weather-now">
-              <div class="weather-temp" id="primary-temp">--°</div>
+              <div class="weather-temp" id="primary-temp">--°F</div>
+
               <div class="weather-now-meta">
                 <div class="weather-summary" id="primary-summary">--</div>
                 <div class="weather-hilo" id="primary-hilo">H --°  L --°</div>
@@ -62,7 +65,7 @@
         </div>
       </section>
 
-
+      <!-- Other tiles -->
       <section class="tile">
         <h2>Transit</h2>
         <div class="tile-content subtle">Coming soon</div>
@@ -79,7 +82,7 @@
       </section>
     </main>
 
-    <!-- App-level dim overlay (we'll control this later) -->
+    <!-- App-level dim overlay -->
     <div id="dim-overlay"></div>
   </div>
 
