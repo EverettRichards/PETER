@@ -1,6 +1,6 @@
 from datetime import datetime
 
-def get_weather_stub():
+def get_weather_payload():
     # Replace with real provider later (Open-Meteo, NWS, etc.)
     return {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
