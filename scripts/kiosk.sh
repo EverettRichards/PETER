@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+for i in $(seq 1 200); do
+  if curl -fsS http://localhost:8000/api/health >/dev/null 2>&1; then
+    break
+  fi
+  sleep 0.2
+done
+
 set -euo pipefail
 
 URL="http://localhost:8000"
@@ -12,13 +19,6 @@ xset -dpms || true
 if command -v unclutter >/dev/null 2>&1; then
   unclutter -idle 0.5 -root &
 fi
-
-for i in $(seq 1 60); do
-  if curl -fsS http://localhost:8000/api/health >/dev/null 2>&1; then
-    break
-  fi
-  sleep 0.2
-done
 
 chromium-browser \
   --kiosk \
