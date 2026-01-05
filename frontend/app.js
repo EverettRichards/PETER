@@ -134,3 +134,13 @@ setInterval(setClock, 1000 * 10);
 
 loadWeather();
 setInterval(loadWeather, 1000 * 60 * 10);
+
+window.addEventListener("error", (event) => {
+  const el = document.getElementById("weather-updated");
+  if (el) el.textContent = `JS error: ${event.message}`;
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  const el = document.getElementById("weather-updated");
+  if (el) el.textContent = `Promise error: ${event.reason}`;
+});
