@@ -1,0 +1,108 @@
+:root {
+  --bg: #0b0f14;
+  --tile: #121a22;
+  --text: #e8eef5;
+  --muted: #9bb0c5;
+  --border: rgba(255,255,255,0.08);
+}
+
+* { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.clock {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.grid {
+  flex: 1;
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
+}
+
+.tile {
+  background: var(--tile);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px 16px 14px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tile h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.tile-content {
+  flex: 1;
+  overflow: hidden;
+  font-size: 18px;
+}
+
+.subtle { color: var(--muted); }
+
+.weather-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.weather-row:last-child { border-bottom: none; }
+
+.weather-left { display: flex; flex-direction: column; gap: 3px; }
+.weather-name { font-weight: 650; }
+.weather-cond { color: var(--muted); font-size: 14px; }
+
+.weather-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.weather-temp { font-size: 22px; font-weight: 700; }
+.weather-hilo { color: var(--muted); font-size: 14px; }
+
+/* Dim overlay (we will control opacity from JS) */
+#dim-overlay {
+  position: fixed;
+  inset: 0;
+  background: black;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms linear;
+}
