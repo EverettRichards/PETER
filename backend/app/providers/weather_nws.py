@@ -40,6 +40,7 @@ class Grid:
     grid_id: str
     grid_x: int
     grid_y: int
+    time_zone: str
 
 
 def _slug(name: str) -> str:
@@ -90,7 +91,13 @@ def _get_grid_for_point(lat: float, lon: float) -> Grid:
     key = f"nws_points_{lat:.4f}_{lon:.4f}"
     data = _cached_get_json(url, key, TTL_POINTS)
     props = data["properties"]
-    return Grid(grid_id=props["gridId"], grid_x=int(props["gridX"]), grid_y=int(props["gridY"]))
+    return Grid(
+        grid_id=props["gridId"],
+        grid_x=int(props["gridX"]),
+        grid_y=int(props["gridY"]),
+        time_zone=props.get("timeZone", "UTC"),
+    )
+
 
 
 def _get_forecast_periods(grid: Grid) -> List[Dict[str, Any]]:
@@ -229,6 +236,7 @@ def _city_weather(city: Dict[str, Any], include_week: bool) -> Dict[str, Any]:
 
     out: Dict[str, Any] = {
         "name": name,
+        "timeZone": grid.time_zone,
         "current": {
             "temp_f": current_temp_f,
             "icon": icon_display,
@@ -242,6 +250,7 @@ def _city_weather(city: Dict[str, Any], include_week: bool) -> Dict[str, Any]:
             "wind": wind,
         },
     }
+
 
     if include_week:
         out["week"] = week

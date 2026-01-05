@@ -35,13 +35,13 @@ html, body {
 }
 
 .title {
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 600;
   letter-spacing: 0.2px;
 }
 
 .clock {
-  font-size: 22px;
+  font-size: 30px;
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
@@ -162,7 +162,7 @@ html, body {
 }
 
 .weather-temp {
-  font-size: 52px;
+  font-size: 74px;
   line-height: 1;
   font-weight: 800;
   letter-spacing: -0.6px;
@@ -176,13 +176,13 @@ html, body {
 }
 
 .weather-summary {
-  font-size: 16px;
+  font-size: 24px;
   color: var(--text);
   font-weight: 650;
 }
 
 .weather-hilo {
-  font-size: 14px;
+  font-size: 20px;
   color: var(--muted);
 }
 
@@ -201,13 +201,13 @@ html, body {
 }
 
 .metric-label {
-  font-size: 12px;
+  font-size: 18px;
   color: var(--muted);
   margin-bottom: 6px;
 }
 
 .metric-value {
-  font-size: 16px;
+  font-size: 24px;
   font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
@@ -238,47 +238,77 @@ html, body {
 .weather-others {
   margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
-.other-card {
+.other-row {
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 12px 12px 10px;
+  border-radius: 18px;
+  padding: 14px 16px;
   background: rgba(255,255,255,0.02);
   display: grid;
-  grid-template-columns: 1fr 54px;
-  gap: 10px;
+  grid-template-columns: 1.2fr 2fr 1.2fr;
+  gap: 14px;
   align-items: center;
 }
 
-.other-name {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: var(--text);
-}
-
-.other-line {
-  font-size: 13px;
-  color: var(--muted);
+.other-left {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.other-temp {
-  font-size: 18px;
+.other-city {
+  font-size: 22px;
   font-weight: 800;
-  color: var(--text);
+}
+
+.other-time {
+  font-size: 18px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.other-mid {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.other-temp-big {
+  font-size: 30px;
+  font-weight: 900;
   font-variant-numeric: tabular-nums;
 }
 
 .other-icon {
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
   opacity: 0.95;
+}
+
+.other-short {
+  font-size: 18px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.other-right {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.other-metric {
+  font-size: 18px;
+  font-weight: 750;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Week forecast */
@@ -289,7 +319,7 @@ html, body {
 }
 
 .week-title {
-  font-size: 13px;
+  font-size: 18px;
   color: var(--muted);
   margin-bottom: 10px;
   font-weight: 650;
@@ -313,7 +343,7 @@ html, body {
 }
 
 .day-name {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--muted);
   font-weight: 650;
   white-space: nowrap;
@@ -329,14 +359,14 @@ html, body {
 }
 
 .day-hilo {
-  font-size: 13px;
+  font-size: 18px;
   color: var(--text);
   font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
 
 .day-precip {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -347,4 +377,13 @@ html, body {
   .primary-icon { width: 110px; height: 110px; }
   .weather-others { grid-template-columns: 1fr; }
   .week-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.primary-time {
+  font-size: 78px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+  margin: 6px 0 10px;
 }
