@@ -1,44 +1,47 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pi Dashboard</title>
-  <link rel="stylesheet" href="/static/style.css" />
-</head>
-<body>
-  <div id="root">
-    <header class="topbar">
-      <div class="title">Pi Dashboard</div>
-      <div id="clock" class="clock">--:--</div>
-    </header>
-
-    <main class="grid">
-      <section class="tile" id="weather-tile">
-        <h2>Weather</h2>
-        <div id="weather-content" class="tile-content">Loading...</div>
-      </section>
-
-      <section class="tile">
-        <h2>Transit</h2>
-        <div class="tile-content subtle">Coming soon</div>
-      </section>
-
-      <section class="tile">
-        <h2>Today</h2>
-        <div class="tile-content subtle">Coming soon</div>
-      </section>
-
-      <section class="tile">
-        <h2>Status</h2>
-        <div class="tile-content" id="status-content">Starting...</div>
-      </section>
-    </main>
-
-    <!-- App-level dim overlay (we'll control this later) -->
-    <div id="dim-overlay"></div>
+<section class="tile weather-tile" id="weather-tile">
+  <div class="weather-header">
+    <div class="weather-title">Weather</div>
+    <div class="weather-subtitle" id="weather-updated">Updating...</div>
   </div>
 
-  <script src="/static/app.js"></script>
-</body>
-</html>
+  <div class="weather-primary" id="weather-primary">
+    <div class="weather-primary-left">
+      <div class="weather-city" id="primary-city">--</div>
+      <div class="weather-now">
+        <div class="weather-temp" id="primary-temp">--°</div>
+        <div class="weather-now-meta">
+          <div class="weather-summary" id="primary-summary">--</div>
+          <div class="weather-hilo" id="primary-hilo">H --°  L --°</div>
+        </div>
+      </div>
+
+      <div class="weather-metrics">
+        <div class="metric">
+          <div class="metric-label">Precip</div>
+          <div class="metric-value" id="primary-precip">--%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Clouds</div>
+          <div class="metric-value" id="primary-clouds">--%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Wind</div>
+          <div class="metric-value" id="primary-wind">--</div>
+        </div>
+      </div>
+
+      <div class="attire" id="primary-attire">--</div>
+    </div>
+
+    <div class="weather-primary-right">
+      <img class="primary-icon" id="primary-icon" alt="" />
+    </div>
+  </div>
+
+  <div class="weather-others" id="weather-others"></div>
+
+  <div class="weather-week">
+    <div class="week-title">Next 7 days</div>
+    <div class="week-grid" id="week-grid"></div>
+  </div>
+</section>

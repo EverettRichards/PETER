@@ -21,3 +21,15 @@ def get_weather_stub():
             }
         ]
     }
+
+def nws_to_tile(forecast_json):
+    periods = forecast_json["properties"]["periods"]
+    today = periods[0]
+
+    return {
+        "name": "San Diego",
+        "temp_f": today["temperature"],
+        "condition": today["shortForecast"],
+        "high_f": today["temperature"],
+        "low_f": None,
+    }

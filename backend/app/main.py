@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-from .providers.weather import get_weather_stub
+from .providers.weather import get_weather_payload
 
 BASE_DIR = Path(__file__).resolve().parents[2]  # repo root
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -22,5 +22,4 @@ def health():
 
 @app.get("/api/weather")
 def weather():
-    # Stub for now; later swap in real provider
-    return get_weather_stub()
+    return get_weather_payload()
