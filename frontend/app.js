@@ -21,22 +21,74 @@ function formatCityTime(timeZone) {
   }
 }
 
-function svgDataUri(svg) {
-  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
-}
-
 function iconFromForecast(text) {
   const t = (text || "").toLowerCase();
 
-  // Simple set: sun / cloud / rain / snow / thunder / fog
-  if (t.includes("thunder")) return svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M24 50l8-14h-8l10-20h16L40 32h10L34 50z"/><path d="M18 42a16 16 0 1 1 28-10A12 12 0 1 1 46 42z" fill="none" stroke="currentColor" stroke-width="4"/></svg>`);
-  if (t.includes("snow")) return svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M18 38a16 16 0 1 1 28-10A12 12 0 1 1 46 38z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M22 48l4-4m0 4l-4-4m18 4l4-4m0 4l-4-4m-9 4l4-4m0 4l-4-4" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`);
-  if (t.includes("rain") || t.includes("showers")) return svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M18 30a16 16 0 1 1 28-10A12 12 0 1 1 46 30z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M24 40l-3 8m10-8l-3 8m10-8l-3 8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`);
-  if (t.includes("fog") || t.includes("haze")) return svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M18 26a16 16 0 1 1 28-10A12 12 0 1 1 46 26z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M14 40h36M10 48h44" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`);
-  if (t.includes("cloud")) return svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M18 38a16 16 0 1 1 28-10A12 12 0 1 1 46 38z" fill="none" stroke="currentColor" stroke-width="4"/></svg>`);
-  // default: sun
-  return svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="12" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 8v8M32 48v8M8 32h8M48 32h8M14 14l6 6M44 44l6 6M50 14l-6 6M20 44l-6 6" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`);
+  if (t.includes("thunder")) {
+    return `
+      <svg viewBox="0 0 64 64" class="wx-svg">
+        <path d="M24 50l8-14h-8l10-20h16L40 32h10L34 50z"/>
+        <path d="M18 42a16 16 0 1 1 28-10A12 12 0 1 1 46 42z"
+              fill="none" stroke="currentColor" stroke-width="4"/>
+      </svg>`;
+  }
+
+  if (t.includes("snow")) {
+    return `
+      <svg viewBox="0 0 64 64" class="wx-svg">
+        <path d="M18 38a16 16 0 1 1 28-10A12 12 0 1 1 46 38z"
+              fill="none" stroke="currentColor" stroke-width="4"/>
+        <path d="M22 48l4-4m0 4l-4-4
+                 m18 4l4-4m0 4l-4-4
+                 m-9 4l4-4m0 4l-4-4"
+              stroke="currentColor" stroke-width="3"
+              stroke-linecap="round"/>
+      </svg>`;
+  }
+
+  if (t.includes("rain") || t.includes("shower")) {
+    return `
+      <svg viewBox="0 0 64 64" class="wx-svg">
+        <path d="M18 30a16 16 0 1 1 28-10A12 12 0 1 1 46 30z"
+              fill="none" stroke="currentColor" stroke-width="4"/>
+        <path d="M24 40l-3 8m10-8l-3 8m10-8l-3 8"
+              stroke="currentColor" stroke-width="4"
+              stroke-linecap="round"/>
+      </svg>`;
+  }
+
+  if (t.includes("fog") || t.includes("haze")) {
+    return `
+      <svg viewBox="0 0 64 64" class="wx-svg">
+        <path d="M18 26a16 16 0 1 1 28-10A12 12 0 1 1 46 26z"
+              fill="none" stroke="currentColor" stroke-width="4"/>
+        <path d="M14 40h36M10 48h44"
+              stroke="currentColor" stroke-width="4"
+              stroke-linecap="round"/>
+      </svg>`;
+  }
+
+  if (t.includes("cloud")) {
+    return `
+      <svg viewBox="0 0 64 64" class="wx-svg">
+        <path d="M18 38a16 16 0 1 1 28-10A12 12 0 1 1 46 38z"
+              fill="none" stroke="currentColor" stroke-width="4"/>
+      </svg>`;
+  }
+
+  // sunny (default)
+  return `
+    <svg viewBox="0 0 64 64" class="wx-svg">
+      <circle cx="32" cy="32" r="12"
+              fill="none" stroke="currentColor" stroke-width="4"/>
+      <path d="M32 8v8M32 48v8M8 32h8M48 32h8
+               M14 14l6 6M44 44l6 6
+               M50 14l-6 6M20 44l-6 6"
+            stroke="currentColor" stroke-width="4"
+            stroke-linecap="round"/>
+    </svg>`;
 }
+
 
 function iconClassFromForecast(text) {
   const t = (text || "").toLowerCase();
@@ -106,7 +158,7 @@ function renderPrimary(p) {
   const wrapper = iconEl.parentElement;
 
   wrapper.className = `wx-icon ${iconClassFromForecast(cur.shortForecast)}`;
-  iconEl.src = iconFromForecast(cur.shortForecast || "");
+  wrapper.innerHTML = iconFromForecast(cur.shortForecast || "");
   iconEl.style.display = "block";
 
 }
@@ -134,7 +186,9 @@ function renderOthers(others) {
     <div class="other-time" id="${safeId}">${timeStr}</div>
     <div class="other-temp-big">${fmtTemp(cur.temp_f)}°F</div>
     <div class="wx-icon ${iconClassFromForecast(cur.shortForecast)}">
-      <img class="other-icon" src="${iconSrc}" alt="" />
+      <div class="wx-icon ${iconClassFromForecast(cur.shortForecast)}">
+        ${iconFromForecast(cur.shortForecast || "")}
+      </div>
     </div>
     <div class="other-right">
       <div class="other-metric">H ${fmtTemp(today.high_f)}°</div>
@@ -149,6 +203,8 @@ function renderOthers(others) {
 
 
 function renderWeek(week) {
+  if (!week || !week.length) return;
+
   const grid = document.getElementById("week-grid");
   grid.innerHTML = "";
 
@@ -158,10 +214,10 @@ function renderWeek(week) {
 
     const cls = iconClassFromForecast(d.shortForecast);
     const icon = `
-      <div class="wx-icon ${cls}">
-        <img class="day-icon" src="${iconSrc}" alt="" />
-      </div>
-    `;
+      <div class="wx-icon ${iconClassFromForecast(d.shortForecast)}">
+        ${iconFromForecast(d.shortForecast || "")}
+      </div>`;
+
 
 
     const precip = (d.precip_pct === null || d.precip_pct === undefined) ? "--" : `${d.precip_pct}`;
