@@ -236,80 +236,76 @@ html, body {
 
 /* Secondary cities */
 .weather-others {
-  margin-top: 12px;
+  margin-top: 14px;
   display: grid;
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px; /* row gap, column gap */
 }
+
 
 .other-row {
   border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 14px 16px;
+  border-radius: 16px;
+  padding: 14px 18px;
   background: rgba(255,255,255,0.02);
+
   display: grid;
-  grid-template-columns: 1.2fr 2fr 1.2fr;
-  gap: 14px;
+  grid-template-columns:
+    1.3fr   /* city */
+    1fr     /* time */
+    1fr     /* temp */
+    56px    /* icon */
+    2fr     /* hi/lo/precip */
+  ;
   align-items: center;
+  column-gap: 14px;
 }
 
-.other-left {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
+/* City name */
 .other-city {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
+  white-space: nowrap;
 }
 
+/* Local time */
 .other-time {
-  font-size: 18px;
-  color: var(--muted);
+  font-size: 20px;
   font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
 }
 
-.other-mid {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
+/* Current temperature */
 .other-temp-big {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
+/* Icon */
 .other-icon {
   width: 44px;
   height: 44px;
   object-fit: contain;
-  opacity: 0.95;
 }
 
-.other-short {
-  font-size: 18px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
+/* Right-side metrics */
 .other-right {
   display: flex;
-  justify-content: flex-end;
-  gap: 14px;
-  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: flex-start;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .other-metric {
-  font-size: 18px;
-  font-weight: 750;
-  color: var(--text);
+  font-size: 20px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+
 
 /* Week forecast */
 .weather-week {
@@ -386,4 +382,83 @@ html, body {
   letter-spacing: -0.8px;
   font-variant-numeric: tabular-nums;
   margin: 6px 0 10px;
+}
+
+/* =========================
+   Weather icon styling
+   ========================= */
+
+.wx-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* soft glassy look */
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.18),
+    0 8px 18px rgba(0,0,0,0.25);
+}
+
+.wx-icon img {
+  width: 36px;
+  height: 36px;
+}
+
+/* ---------- Conditions ---------- */
+
+/* Sunny / clear */
+.wx-sunny {
+  background: linear-gradient(180deg, #4da3ff, #2b6cb0);
+  color: #ffd54a;
+}
+
+/* Partly cloudy */
+.wx-partly {
+  background: linear-gradient(180deg, #6aa6d8, #3f6f9f);
+  color: #f5f5f5;
+}
+
+/* Cloudy */
+.wx-cloudy {
+  background: linear-gradient(180deg, #9aa7b2, #6b7785);
+  color: #ffffff;
+}
+
+/* Rain / showers */
+.wx-rain {
+  background: linear-gradient(180deg, #4c7fa8, #2f5d87);
+  color: #cfe9ff;
+}
+
+/* Thunderstorms */
+.wx-thunder {
+  background: linear-gradient(180deg, #3c3c6d, #24244a);
+  color: #ffd84d;
+}
+
+/* Snow */
+.wx-snow {
+  background: linear-gradient(180deg, #9fd3ff, #5fa6dd);
+  color: #ffffff;
+}
+
+/* Fog / haze */
+.wx-fog {
+  background: linear-gradient(180deg, #b7c3cc, #8e9aa4);
+  color: #ffffff;
+}
+
+/* Smaller icons for week forecast */
+.weather-week .wx-icon {
+  width: 44px;
+  height: 44px;
+}
+
+.weather-week .wx-icon img {
+  width: 26px;
+  height: 26px;
 }

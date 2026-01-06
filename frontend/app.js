@@ -38,6 +38,17 @@ function iconFromForecast(text) {
   return svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="12" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 8v8M32 48v8M8 32h8M48 32h8M14 14l6 6M44 44l6 6M50 14l-6 6M20 44l-6 6" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`);
 }
 
+function iconClassFromForecast(text) {
+  const t = (text || "").toLowerCase();
+
+  if (t.includes("thunder")) return "wx-thunder";
+  if (t.includes("snow")) return "wx-snow";
+  if (t.includes("rain") || t.includes("shower")) return "wx-rain";
+  if (t.includes("fog") || t.includes("haze")) return "wx-fog";
+  if (t.includes("cloud")) return "wx-cloudy";
+  return "wx-sunny";
+}
+
 
 function fmtTemp(t) {
   if (t === null || t === undefined) return "--";
@@ -92,6 +103,9 @@ function renderPrimary(p) {
   //   iconEl.style.display = "none";
   // }
   const iconEl = document.getElementById("primary-icon");
+  const wrapper = iconEl.parentElement;
+
+  wrapper.className = `wx-icon ${iconClassFromForecast(cur.shortForecast)}`;
   iconEl.src = iconFromForecast(cur.shortForecast || "");
   iconEl.style.display = "block";
 
@@ -116,23 +130,19 @@ function renderOthers(others) {
     const safeId = `tz_${o.name}`;
 
     div.innerHTML = `
-      <div class="other-left">
-        <div class="other-city">${o.name}</div>
-        <div class="other-time" id="${safeId}">${timeStr}</div>
-      </div>
+    <div class="other-city">${o.name}</div>
+    <div class="other-time" id="${safeId}">${timeStr}</div>
+    <div class="other-temp-big">${fmtTemp(cur.temp_f)}°F</div>
+    <div class="wx-icon ${iconClassFromForecast(cur.shortForecast)}">
+      <img class="other-icon" src="${iconSrc}" alt="" />
+    </div>
+    <div class="other-right">
+      <div class="other-metric">H ${fmtTemp(today.high_f)}°</div>
+      <div class="other-metric">L ${fmtTemp(today.low_f)}°</div>
+      <div class="other-metric">${fmtPct(today.precip_pct)}%</div>
+    </div>
+  `;
 
-      <div class="other-mid">
-        <div class="other-temp-big">${fmtTemp(cur.temp_f)}°F</div>
-        <img class="other-icon" src="${iconSrc}" alt="" />
-        <div class="other-short">${safeText(cur.shortForecast || "")}</div>
-      </div>
-
-      <div class="other-right">
-        <div class="other-metric">H ${fmtTemp(today.high_f)}°</div>
-        <div class="other-metric">L ${fmtTemp(today.low_f)}°</div>
-        <div class="other-metric">${fmtPct(today.precip_pct)}% precip</div>
-      </div>
-    `;
     wrap.appendChild(div);
   }
 }
@@ -146,8 +156,13 @@ function renderWeek(week) {
     const el = document.createElement("div");
     el.className = "day";
 
-    const iconSrc = iconFromForecast(d.shortForecast || "");
-    const icon = `<img class="day-icon" src="${iconSrc}" alt="" />`;
+    const cls = iconClassFromForecast(d.shortForecast);
+    const icon = `
+      <div class="wx-icon ${cls}">
+        <img class="day-icon" src="${iconSrc}" alt="" />
+      </div>
+    `;
+
 
     const precip = (d.precip_pct === null || d.precip_pct === undefined) ? "--" : `${d.precip_pct}`;
 
