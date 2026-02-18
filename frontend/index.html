@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PETER</title>
   <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+        crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
 </head>
 <body>
   <div id="root">
@@ -64,6 +70,15 @@
           <div class="week-title">Next 7 days</div>
           <div class="week-grid" id="week-grid"></div>
         </div>
+      </section>
+
+      <!-- Transit Map (spans full width) -->
+      <section class="tile transit-tile" id="transit-tile">
+        <div class="transit-header">
+          <div class="transit-title">San Diego Transit</div>
+          <div class="transit-subtitle" id="transit-updated">Updating...</div>
+        </div>
+        <div id="transit-map" class="transit-map"></div>
       </section>
 
       <!-- Other tiles -->

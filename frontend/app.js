@@ -285,3 +285,138 @@ setInterval(() => {
     if (tzel) tzel.textContent = formatCityTime(o.timeZone || "UTC");
   }
 }, 10_000);
+
+// =========================
+// Transit Map
+// =========================
+
+let transitMap = null;
+let vehicleMarkers = {};
+
+// Bus icon (blue circle)
+const busIcon = L.divIcon({
+  className: 'transit-marker bus-marker',
+  html: '<div class="marker-dot"></div>',
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
+});
+
+// Trolley icon (red circle)
+const trolleyIcon = L.divIcon({
+  className: 'transit-marker trolley-marker',
+  html: '<div class="marker-dot"></div>',
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
+});
+
+function initTransitMap() {
+  const mapContainer = document.getElementById('transit-map');
+  if (!mapContainer || transitMap) return;
+
+  // Initialize map centered on San Diego
+  transitMap = L.map('transit-map', {
+    zoomControl: true,
+    attributionControl: false,
+  }).setView([32.7157, -117.1611], 11);
+
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+  }).addTo(transitMap);
+
+  // Add custom styles for markers via style element
+  const style = document.createElement('style');
+  style.textContent = `
+    .transit-marker {
+      background: transparent;
+      border: none;
+    }
+    .marker-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+    .bus-marker .marker-dot {
+      background: #4a90e2;
+    }
+    .trolley-marker .marker-dot {
+      background: #e74c3c;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+async function loadTransitVehicles() {
+  const status = document.getElementById("status-content");
+  const subtitle = document.getElementById("transit-updated");
+  
+  try {
+    const res = await fetch("/api/transit/vehicles", { cache: "no-store" });
+    const data = await res.json();
+
+    if (!data.success) {
+      if (subtitle) subtitle.textContent = `Error: ${data.error}`;
+      return;
+    }
+
+    // Update timestamp
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    if (subtitle) subtitle.textContent = `Updated ${hh}:${mm} - ${data.count} vehicles`;
+
+    // Track current vehicle IDs
+    const currentVehicleIds = new Set();
+
+    // Update or add markers
+    for (const vehicle of data.vehicles) {
+      currentVehicleIds.add(vehicle.id);
+
+      const icon = vehicle.vehicle_type === 'trolley' ? trolleyIcon : busIcon;
+      const latLng = [vehicle.latitude, vehicle.longitude];
+
+      if (vehicleMarkers[vehicle.id]) {
+        // Update existing marker
+        vehicleMarkers[vehicle.id].setLatLng(latLng);
+      } else {
+        // Create new marker
+        const marker = L.marker(latLng, { icon })
+          .bindPopup(`
+            <strong>${vehicle.vehicle_type === 'trolley' ? 'Trolley' : 'Bus'}</strong><br>
+            Route: ${vehicle.route_id}<br>
+            Vehicle: ${vehicle.vehicle_id || 'N/A'}
+          `)
+          .addTo(transitMap);
+        
+        vehicleMarkers[vehicle.id] = marker;
+      }
+    }
+
+    // Remove markers for vehicles no longer in the feed
+    for (const id in vehicleMarkers) {
+      if (!currentVehicleIds.has(id)) {
+        transitMap.removeLayer(vehicleMarkers[id]);
+        delete vehicleMarkers[id];
+      }
+    }
+
+  } catch (e) {
+    if (subtitle) subtitle.textContent = `Transit error: ${e}`;
+  }
+}
+
+// Initialize transit map when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initTransitMap();
+    loadTransitVehicles();
+  });
+} else {
+  initTransitMap();
+  loadTransitVehicles();
+}
+
+// Update transit vehicles every 60 seconds
+setInterval(loadTransitVehicles, 1000 * 60);

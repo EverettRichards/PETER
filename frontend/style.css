@@ -467,3 +467,40 @@ html, body {
   width: 36px;
   height: 36px;
 }
+
+/* =========================
+   Transit Map Styling
+   ========================= */
+
+.transit-tile {
+  grid-column: 1 / -1; /* span full width */
+  padding: 18px 18px 16px;
+  min-height: 600px;
+}
+
+.transit-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.transit-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--text);
+}
+
+.transit-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.transit-map {
+  flex: 1;
+  min-height: 550px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
