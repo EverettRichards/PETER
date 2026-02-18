@@ -8,7 +8,8 @@ import re
 from typing import List, Dict, Any
 
 SDMTS_API_URL = "https://realtime.sdmts.com/api/api/gtfs_realtime/vehicle-positions-for-agency/MTS.pbtext"
-API_KEY = "90662cf7-2951-4fd4-9cdd-7c9cedadb247"
+# API key should be stored in environment variable for production
+API_KEY = os.environ.get("SDMTS_API_KEY", "90662cf7-2951-4fd4-9cdd-7c9cedadb247")
 
 # Trolley route IDs (based on SDMTS system)
 TROLLEY_ROUTES = {"510", "520", "530", "532"}
@@ -70,7 +71,7 @@ def parse_pbtext_response(text: str) -> List[Dict[str, Any]]:
             vehicle_id_match = re.search(r'vehicle\s*{\s*id:\s*"([^"]+)"', block)
             vehicle_id = vehicle_id_match.group(1) if vehicle_id_match else None
             
-            # Extract timestamp
+            # Extract timestamp (Unix epoch timestamp in seconds, UTC)
             timestamp_match = re.search(r'timestamp:\s*(\d+)', block)
             timestamp = int(timestamp_match.group(1)) if timestamp_match else None
             

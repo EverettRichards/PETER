@@ -355,7 +355,6 @@ function initTransitMap() {
 }
 
 async function loadTransitVehicles() {
-  const status = document.getElementById("status-content");
   const subtitle = document.getElementById("transit-updated");
   
   if (!transitMap || typeof L === 'undefined') {
@@ -368,7 +367,10 @@ async function loadTransitVehicles() {
     const data = await res.json();
 
     if (!data.success) {
-      if (subtitle) subtitle.textContent = `Error: ${data.error.substring(0, 100)}...`;
+      // Display error type and first part of message for diagnostic purposes
+      const errorMsg = data.error || "Unknown error";
+      const errorType = errorMsg.split(':')[0];
+      if (subtitle) subtitle.textContent = `Error: ${errorType}`;
       return;
     }
 
@@ -414,10 +416,24 @@ async function loadTransitVehicles() {
     }
 
   } catch (e) {
-    if (subtitle) subtitle.textContent = `Transit error: ${e}`;
+    if (subtitle) subtitle.textContent = `Transit error: ${e.message || e}`;
   }
 }
 
-// Don't auto-initialize, wait for Leaflet to load (triggered by onload in HTML)
+// Initialize map when Leaflet loads
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof L !== 'undefined') {
+      initTransitMap();
+      loadTransitVehicles();
+    }
+  });
+} else {
+  if (typeof L !== 'undefined') {
+    initTransitMap();
+    loadTransitVehicles();
+  }
+}
+
 // Update transit vehicles every 60 seconds
 setInterval(loadTransitVehicles, 1000 * 60);
