@@ -294,24 +294,30 @@ let transitMap = null;
 let vehicleMarkers = {};
 
 // Bus icon (blue circle)
-const busIcon = L.divIcon({
-  className: 'transit-marker bus-marker',
-  html: '<div class="marker-dot"></div>',
-  iconSize: [12, 12],
-  iconAnchor: [6, 6],
-});
+function getBusIcon() {
+  if (typeof L === 'undefined') return null;
+  return L.divIcon({
+    className: 'transit-marker bus-marker',
+    html: '<div class="marker-dot"></div>',
+    iconSize: [12, 12],
+    iconAnchor: [6, 6],
+  });
+}
 
 // Trolley icon (red circle)
-const trolleyIcon = L.divIcon({
-  className: 'transit-marker trolley-marker',
-  html: '<div class="marker-dot"></div>',
-  iconSize: [12, 12],
-  iconAnchor: [6, 6],
-});
+function getTrolleyIcon() {
+  if (typeof L === 'undefined') return null;
+  return L.divIcon({
+    className: 'transit-marker trolley-marker',
+    html: '<div class="marker-dot"></div>',
+    iconSize: [12, 12],
+    iconAnchor: [6, 6],
+  });
+}
 
 function initTransitMap() {
   const mapContainer = document.getElementById('transit-map');
-  if (!mapContainer || transitMap) return;
+  if (!mapContainer || transitMap || typeof L === 'undefined') return;
 
   // Initialize map centered on San Diego
   transitMap = L.map('transit-map', {
@@ -352,12 +358,17 @@ async function loadTransitVehicles() {
   const status = document.getElementById("status-content");
   const subtitle = document.getElementById("transit-updated");
   
+  if (!transitMap || typeof L === 'undefined') {
+    if (subtitle) subtitle.textContent = "Map not ready";
+    return;
+  }
+  
   try {
     const res = await fetch("/api/transit/vehicles", { cache: "no-store" });
     const data = await res.json();
 
     if (!data.success) {
-      if (subtitle) subtitle.textContent = `Error: ${data.error}`;
+      if (subtitle) subtitle.textContent = `Error: ${data.error.substring(0, 100)}...`;
       return;
     }
 
@@ -374,7 +385,7 @@ async function loadTransitVehicles() {
     for (const vehicle of data.vehicles) {
       currentVehicleIds.add(vehicle.id);
 
-      const icon = vehicle.vehicle_type === 'trolley' ? trolleyIcon : busIcon;
+      const icon = vehicle.vehicle_type === 'trolley' ? getTrolleyIcon() : getBusIcon();
       const latLng = [vehicle.latitude, vehicle.longitude];
 
       if (vehicleMarkers[vehicle.id]) {
@@ -407,16 +418,6 @@ async function loadTransitVehicles() {
   }
 }
 
-// Initialize transit map when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    initTransitMap();
-    loadTransitVehicles();
-  });
-} else {
-  initTransitMap();
-  loadTransitVehicles();
-}
-
+// Don't auto-initialize, wait for Leaflet to load (triggered by onload in HTML)
 // Update transit vehicles every 60 seconds
 setInterval(loadTransitVehicles, 1000 * 60);
