@@ -89,6 +89,15 @@ function iconFromForecast(text) {
     </svg>`;
 }
 
+function escapeHtml(text) {
+  return String(text || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 
 function iconClassFromForecast(text) {
   const t = (text || "").toLowerCase();
@@ -117,6 +126,16 @@ function safeText(s) {
   return String(s);
 }
 
+function formatDateLabel(ts, timeZone) {
+  const d = new Date(ts * 1000);
+  return new Intl.DateTimeFormat([], {
+    timeZone,
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(d);
+}
+
 function setUpdated(ts) {
   const el = document.getElementById("weather-updated");
   const d = new Date(ts * 1000);
@@ -125,11 +144,26 @@ function setUpdated(ts) {
   el.textContent = `Updated ${hh}:${mm}`;
 }
 
+function renderWarning(message) {
+  const el = document.getElementById("rain-warning");
+  if (!el) return;
+
+  if (!message) {
+    el.textContent = "";
+    el.classList.add("hidden");
+    return;
+  }
+
+  el.textContent = message;
+  el.classList.remove("hidden");
+}
+
 function renderPrimary(p) {
   document.getElementById("primary-city").textContent = p.name;
 
   const tz = p.timeZone || "UTC";
   document.getElementById("primary-time").textContent = formatCityTime(tz);
+  document.getElementById("primary-date").textContent = formatDateLabel(window.__weatherData?.updated_at || Math.floor(Date.now() / 1000), tz);
 
   const cur = p.current || {};
   const today = p.today || {};
@@ -176,8 +210,6 @@ function renderOthers(others) {
     const div = document.createElement("div");
     div.className = "other-row";
 
-    const iconSrc = iconFromForecast(cur.shortForecast || "");
-
     // Give the time span an id so our periodic refresher can update it
     const safeId = `tz_${o.name}`;
 
@@ -186,9 +218,7 @@ function renderOthers(others) {
     <div class="other-time" id="${safeId}">${timeStr}</div>
     <div class="other-temp-big">${fmtTemp(cur.temp_f)}°F</div>
     <div class="wx-icon ${iconClassFromForecast(cur.shortForecast)}">
-      <div class="wx-icon ${iconClassFromForecast(cur.shortForecast)}">
-        ${iconFromForecast(cur.shortForecast || "")}
-      </div>
+      ${iconFromForecast(cur.shortForecast || "")}
     </div>
     <div class="other-right">
       <div class="other-metric">H ${fmtTemp(today.high_f)}°</div>
@@ -249,6 +279,7 @@ async function loadWeather() {
     renderPrimary(data.primary);
     renderOthers(data.others);
     renderWeek(data.primary.week);
+    renderWarning(data.primary.rain_warning);
 
     status.textContent = "OK";
   } catch (e) {
@@ -292,6 +323,20 @@ setInterval(() => {
 
 let transitMap = null;
 let vehicleMarkers = {};
+let landmarkMarker = null;
+
+const TROLLEY_LINE_STYLES = {
+  Blue: { className: "trolley-line-blue", color: "#0f4b8b" },
+  Green: { className: "trolley-line-green", color: "#15853b" },
+  Orange: { className: "trolley-line-orange", color: "#e28112" },
+  Copper: { className: "trolley-line-copper", color: "#5f2e0b" },
+  Trolley: { className: "trolley-line-generic", color: "#888888" },
+};
+
+const TRANSIT_BOUNDS = [
+  [32.705, -117.22],
+  [32.905, -116.99],
+];
 
 // Bus icon (blue circle)
 function getBusIcon() {
@@ -299,19 +344,38 @@ function getBusIcon() {
   return L.divIcon({
     className: 'transit-marker bus-marker',
     html: '<div class="marker-dot"></div>',
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
   });
 }
 
-// Trolley icon (red circle)
-function getTrolleyIcon() {
+function getTrolleyIcon(lineName) {
+  if (typeof L === 'undefined') return null;
+  const style = TROLLEY_LINE_STYLES[lineName] || TROLLEY_LINE_STYLES.Trolley;
+  return L.divIcon({
+    className: `transit-marker trolley-marker ${style.className}`,
+    html: `
+      <div class="marker-wrap">
+        <div class="marker-dot"></div>
+      </div>
+    `,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  });
+}
+
+function getLandmarkIcon() {
   if (typeof L === 'undefined') return null;
   return L.divIcon({
-    className: 'transit-marker trolley-marker',
-    html: '<div class="marker-dot"></div>',
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
+    className: 'transit-marker landmark-marker',
+    html: `
+      <div class="marker-wrap landmark-wrap">
+        <div class="marker-star">★</div>
+        <div class="marker-label">The Rive</div>
+      </div>
+    `,
+    iconSize: [60, 42],
+    iconAnchor: [30, 21],
   });
 }
 
@@ -319,16 +383,23 @@ function initTransitMap() {
   const mapContainer = document.getElementById('transit-map');
   if (!mapContainer || transitMap || typeof L === 'undefined') return;
 
-  // Initialize map centered on San Diego
+  // Focus tighter on the San Diego core to reduce empty ocean/desert coverage.
   transitMap = L.map('transit-map', {
     zoomControl: true,
     attributionControl: false,
-  }).setView([32.7157, -117.1611], 11);
+  }).setView([32.78, -117.09], 12.4);
 
-  // Add OpenStreetMap tiles
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  transitMap.setMinZoom(11.4);
+  transitMap.setMaxZoom(14.5);
+
+  // Use a reliable full-color basemap.
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
+    subdomains: 'abcd',
+    crossOrigin: true,
   }).addTo(transitMap);
+
+  transitMap.fitBounds(TRANSIT_BOUNDS, { padding: [8, 8] });
 
   // Add custom styles for markers via style element
   const style = document.createElement('style');
@@ -337,21 +408,81 @@ function initTransitMap() {
       background: transparent;
       border: none;
     }
+    .marker-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transform: translateY(-1px);
+    }
     .marker-dot {
-      width: 12px;
-      height: 12px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       border: 2px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+      flex: none;
     }
     .bus-marker .marker-dot {
-      background: #4a90e2;
+      background: #f28b8b;
     }
     .trolley-marker .marker-dot {
-      background: #e74c3c;
+      width: 18px;
+      height: 18px;
+      border-width: 2px;
+    }
+    .trolley-line-blue .marker-dot {
+      background: #2f7fd6;
+    }
+    .trolley-line-green .marker-dot {
+      background: #63d28b;
+    }
+    .trolley-line-orange .marker-dot {
+      background: #ffab4d;
+    }
+    .trolley-line-copper .marker-dot {
+      background: #c87f4a;
+    }
+    .trolley-line-generic .marker-dot {
+      background: #ffd166;
+    }
+    .marker-label {
+      padding: 2px 7px 3px;
+      border-radius: 999px;
+      background: rgba(8, 14, 20, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #f7fbff;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+    .landmark-wrap .marker-star {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff3b0 0%, #f5c94c 45%, #b77814 100%);
+      color: #1d1300;
+      font-size: 14px;
+      line-height: 1;
+      box-shadow: 0 0 0 2px rgba(255, 224, 128, 0.24), 0 4px 10px rgba(0, 0, 0, 0.45);
+      margin-bottom: 2px;
     }
   `;
   document.head.appendChild(style);
+
+  const landmarkLatLng = [32.76325, -117.06256];
+  landmarkMarker = L.marker(landmarkLatLng, { icon: getLandmarkIcon() })
+    .bindPopup(`
+      <strong>Golden star</strong><br>
+      32°45'47.7"N 117°03'45.2"W
+    `)
+    .addTo(transitMap);
 }
 
 async function loadTransitVehicles() {
@@ -387,17 +518,20 @@ async function loadTransitVehicles() {
     for (const vehicle of data.vehicles) {
       currentVehicleIds.add(vehicle.id);
 
-      const icon = vehicle.vehicle_type === 'trolley' ? getTrolleyIcon() : getBusIcon();
+      const icon = vehicle.vehicle_type === 'trolley'
+        ? getTrolleyIcon(vehicle.trolley_line || 'Trolley')
+        : getBusIcon();
       const latLng = [vehicle.latitude, vehicle.longitude];
 
       if (vehicleMarkers[vehicle.id]) {
         // Update existing marker
+        vehicleMarkers[vehicle.id].setIcon(icon);
         vehicleMarkers[vehicle.id].setLatLng(latLng);
       } else {
         // Create new marker
         const marker = L.marker(latLng, { icon })
           .bindPopup(`
-            <strong>${vehicle.vehicle_type === 'trolley' ? 'Trolley' : 'Bus'}</strong><br>
+            <strong>${vehicle.vehicle_type === 'trolley' ? `${escapeHtml(vehicle.trolley_line || 'Trolley')} Line` : 'Bus'}</strong><br>
             Route: ${vehicle.route_id}<br>
             Vehicle: ${vehicle.vehicle_id || 'N/A'}
           `)
@@ -435,5 +569,5 @@ if (document.readyState === 'loading') {
   }
 }
 
-// Update transit vehicles every 60 seconds
-setInterval(loadTransitVehicles, 1000 * 60);
+// Update transit vehicles every 15 seconds
+setInterval(loadTransitVehicles, 1000 * 15);

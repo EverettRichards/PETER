@@ -23,14 +23,23 @@
       <!-- Weather (spans full width) -->
       <section class="tile weather-tile" id="weather-tile">
         <div class="weather-header">
-          <div class="weather-title">Weather</div>
-          <div class="weather-subtitle" id="weather-updated">Updating...</div>
+          <div>
+            <div class="weather-title">San Diego Weather</div>
+            <div class="weather-subtitle" id="weather-updated">Updating...</div>
+          </div>
+          <div class="weather-badge">Local first</div>
         </div>
+
+        <div class="weather-alert hidden" id="rain-warning"></div>
 
         <div class="weather-primary" id="weather-primary">
           <div class="weather-primary-left">
             <div class="weather-city" id="primary-city">--</div>
-            <div class="primary-time" id="primary-time">--:--</div>
+
+            <div class="time-wrap">
+              <div class="primary-time" id="primary-time">--:--</div>
+              <div class="primary-date" id="primary-date">--</div>
+            </div>
 
             <div class="weather-now">
               <div class="weather-temp" id="primary-temp">--°F</div>
@@ -56,7 +65,10 @@
               </div>
             </div>
 
-            <div class="attire" id="primary-attire">--</div>
+            <div class="today-strip">
+              <div class="today-strip-label">Dress for today</div>
+              <div class="attire" id="primary-attire">--</div>
+            </div>
           </div>
 
           <div class="weather-primary-right wx-icon">

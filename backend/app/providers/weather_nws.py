@@ -15,8 +15,8 @@ import requests
 # -----------------------------
 CITIES: List[Dict[str, Any]] = [
     {"name": "San Diego, CA", "lat": 32.7764, "lon": -117.0719},  # primary
-    {"name": "Erie, CO", "lat": 40.0503, "lon": -105.0500},
-    {"name": "Boston, MA", "lat": 42.3601, "lon": -71.0589},
+    {"name": "Newark, DE", "lat": 39.6837, "lon": -75.7497},
+    {"name": "Poway, CA", "lat": 32.9628, "lon": -117.0359},
 ]
 
 # Cache TTLs (seconds)
@@ -157,6 +157,47 @@ def _precip_from_period(period: Dict[str, Any]) -> Optional[int]:
     return None
 
 
+def _forecast_mentions_rain(period: Dict[str, Any]) -> bool:
+    text = " ".join(
+        str(period.get(key, ""))
+        for key in ("shortForecast", "detailedForecast", "name")
+    ).lower()
+    return any(word in text for word in ("rain", "shower", "thunderstorm", "drizzle"))
+
+
+def _build_rain_warning(week: List[Dict[str, Any]], forecast_periods: List[Dict[str, Any]]) -> Optional[str]:
+    if not forecast_periods:
+        return None
+
+    upcoming = forecast_periods[:4]
+    rain_periods = []
+    for period in upcoming:
+        precip = _precip_from_period(period)
+        if _forecast_mentions_rain(period) or (precip is not None and precip >= 40):
+            rain_periods.append(period)
+    if not rain_periods:
+        return None
+
+    labels = []
+    for period in rain_periods:
+        name = str(period.get("name", "")).strip()
+        if name:
+            labels.append(name.lower())
+
+    if labels:
+        if any("tonight" in label for label in labels) and any(label in {"tomorrow", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"} for label in labels):
+            return "Rain expected tonight and tomorrow. Cover the bike seat before you go to bed."
+        if any("tonight" in label for label in labels):
+            return "Rain expected tonight. Cover the bike seat before you go to bed."
+        if any(label in {"tomorrow", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"} for label in labels):
+            return "Rain expected tomorrow. Cover the bike seat before you leave."
+
+    if any(_forecast_mentions_rain(period) for period in rain_periods[:2]):
+        return "Rain is likely in the next day. Cover the bike seat if you want to keep it dry."
+
+    return None
+
+
 def _sky_from_hourly(period: Dict[str, Any]) -> Optional[int]:
     # Hourly periods include "cloudCover" in some cases. If absent, return None.
     cc = period.get("cloudCover")
@@ -255,6 +296,7 @@ def _city_weather(city: Dict[str, Any], include_week: bool) -> Dict[str, Any]:
     if include_week:
         out["week"] = week
         out["attire"] = _attire_recommendation(high_f, low_f, precip_display)
+        out["rain_warning"] = _build_rain_warning(week, forecast_periods)
 
     return out
 

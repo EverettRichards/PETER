@@ -15,6 +15,15 @@ API_KEY = os.environ.get("SDMTS_API_KEY", "90662cf7-2951-4fd4-9cdd-7c9cedadb247"
 TROLLEY_ROUTES = {"510", "520", "530", "532"}
 
 
+def _trolley_line_from_route(route_id: str) -> str:
+    return {
+        "510": "Blue",
+        "520": "Orange",
+        "530": "Green",
+        "540": "Copper",
+    }.get(route_id, "Trolley")
+
+
 def parse_pbtext_response(text: str) -> List[Dict[str, Any]]:
     """
     Parse the human-readable pbtext format response.
@@ -77,6 +86,7 @@ def parse_pbtext_response(text: str) -> List[Dict[str, Any]]:
             
             # Determine vehicle type
             vehicle_type = "trolley" if route_id in TROLLEY_ROUTES else "bus"
+            trolley_line = _trolley_line_from_route(route_id) if vehicle_type == "trolley" else None
             
             vehicle_data = {
                 "id": entity_id,
@@ -84,6 +94,7 @@ def parse_pbtext_response(text: str) -> List[Dict[str, Any]]:
                 "longitude": longitude,
                 "route_id": route_id,
                 "vehicle_type": vehicle_type,
+                "trolley_line": trolley_line,
                 "vehicle_id": vehicle_id,
                 "timestamp": timestamp,
             }
@@ -107,9 +118,9 @@ def get_mock_vehicle_positions() -> Dict[str, Any]:
         {"id": "3", "latitude": 32.6957, "longitude": -117.1811, "route_id": "15", "vehicle_type": "bus", "vehicle_id": "2003", "timestamp": None},
         {"id": "4", "latitude": 32.7457, "longitude": -117.1211, "route_id": "20", "vehicle_type": "bus", "vehicle_id": "2004", "timestamp": None},
         # Trolleys
-        {"id": "5", "latitude": 32.7057, "longitude": -117.1511, "route_id": "510", "vehicle_type": "trolley", "vehicle_id": "3001", "timestamp": None},
-        {"id": "6", "latitude": 32.7257, "longitude": -117.1311, "route_id": "520", "vehicle_type": "trolley", "vehicle_id": "3002", "timestamp": None},
-        {"id": "7", "latitude": 32.6857, "longitude": -117.1711, "route_id": "530", "vehicle_type": "trolley", "vehicle_id": "3003", "timestamp": None},
+        {"id": "5", "latitude": 32.7057, "longitude": -117.1511, "route_id": "510", "vehicle_type": "trolley", "trolley_line": "Blue", "vehicle_id": "3001", "timestamp": None},
+        {"id": "6", "latitude": 32.7257, "longitude": -117.1311, "route_id": "520", "vehicle_type": "trolley", "trolley_line": "Green", "vehicle_id": "3002", "timestamp": None},
+        {"id": "7", "latitude": 32.6857, "longitude": -117.1711, "route_id": "530", "vehicle_type": "trolley", "trolley_line": "Orange", "vehicle_id": "3003", "timestamp": None},
     ]
     
     return {
